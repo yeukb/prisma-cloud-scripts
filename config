@@ -1,0 +1,4 @@
+# For the list of Prisma Cloud API URLs, refer to: https://prisma.pan.dev/api/cloud/api-urls
+prisma_api_endpoint=api.prismacloud.io
+access_key=
+secret_key=
