@@ -44,6 +44,7 @@ do
   ACCOUNT_GROUP_ENCODED=$(echo "$i" | sed "s/ /%20/g")
 
   # Get the number of alerts by policy, and then sum all to get the total number of high alerts for an Account Group
+  # https://prisma.pan.dev/api/cloud/cspm/alerts#operation/get-alerts-grouped
   numAlerts=$(curl -s -X GET \
     -H "Content-Type: application/json" \
     -H "Accept: application/json" \
