@@ -6,7 +6,7 @@ POLICY_SEVERITY=high
 ALERT_STATUS=open
 
 # The filename for the csv file
-outputfile=num_high_alerts_by_account_group.csv
+outputfile=num_high_alerts_by_account_group_2.csv
 
 # Get Prisma Cloud token
 credentials="{\"username\":\"$access_key\", \"password\":\"$secret_key\"}"
@@ -38,18 +38,17 @@ do
   then
     PRISMA_TOKEN=`curl -s -H "Content-Type: application/json" -H "x-redlock-auth: $PRISMA_TOKEN" https://$prisma_api_endpoint/auth_token/extend | jq -r .token`
     token_start_time=`date +%s`
+    # echo "Token Refreshed at $token_start_time"
   fi
 
-  # HTTP Encode the Account Group Name in case it includes a space
-  ACCOUNT_GROUP_ENCODED=$(echo "$i" | sed "s/ /%20/g")
-
   # Get the number of alerts by policy, and then sum all to get the total number of high alerts for an Account Group
-  # https://prisma.pan.dev/api/cloud/cspm/alerts#operation/get-alerts-grouped
-  numAlerts=$(curl -s -X GET \
-    -H "Content-Type: application/json" \
-    -H "Accept: application/json" \
+  numAlerts=$(curl -s -X POST \
+    -H "Content-Type: application/json;charset=UTF-8" \
+    -H "Accept: application/json;charset=UTF-8" \
     -H "x-redlock-auth: $PRISMA_TOKEN" \
-    "https://$prisma_api_endpoint/alert/policy?policy.severity=$POLICY_SEVERITY&alert.status=$ALERT_STATUS&account.group=$ACCOUNT_GROUP_ENCODED" | jq '[.[].alertCount] | add // empty')
+    -d "{\"detailed\":false,\"filters\":[{\"name\":\"timeRange.type\",\"operator\":\"=\",\"value\":\"ALERT_OPENED\"},{\"name\":\"alert.status\",\"operator\":\"=\",\"value\":\"$ALERT_STATUS\"},{\"name\":\"policy.severity\",\"operator\":\"=\",\"value\":\"$POLICY_SEVERITY\"},{\"name\":\"account.group\",\"operator\":\"=\",\"value\":\"$i\"}],\"timeRange\":{\"type\":\"to_now\",\"value\":\"epoch\"}}" \
+    "https://$prisma_api_endpoint/alert/policy" | jq '[.[].alertCount] | add // empty')
+
 
   # if you want to see the output while the command is running, uncomment the line with the "tee" command
   #     and comment the line with the ">>" operator
@@ -57,10 +56,10 @@ do
   #     and comment the line with the "tee" command
   if [[ -z $numAlerts ]]
   then
-    echo "$i,0" >> $outputfile
-    # echo "$i,0" | tee -a $outputfile
+    # echo "$i,0" >> $outputfile
+    echo "$i,0" | tee -a $outputfile
   else
-    echo "$i,$numAlerts" >> $outputfile
-    # echo "$i,$numAlerts" | tee -a $outputfile
+    # echo "$i,$numAlerts" >> $outputfile
+    echo "$i,$numAlerts" | tee -a $outputfile
   fi
 done
