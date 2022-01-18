@@ -6,7 +6,9 @@ These are some sample scripts for Prisma Cloud.
 2. Install curl and jq if they are not already installed.
 
 ### get_account_groups
-1. Run "*sh get_account_groups.sh*"
+1. Run "*sh get_account_groups.sh*" or
+       "*get_audit_logs_human_readable_date.sh*" or
+       "*get_audit_logs_failed_result_only*"
 
 ### get_audit_logs
 1. Update the **timeType**, **timeAmount** and **timeUnit** in the **get_audit_logs.sh** script
